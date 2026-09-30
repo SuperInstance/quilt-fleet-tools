@@ -1,10 +1,10 @@
 __pycache__/
-*.py[cod]
+*.pyc
 .pytest_cache/
-*.receipt.json
-*.chain.jsonl
-.env.keys
+seals/
+gate_receipts/
+gate_receipts_test_*/
 *.egg-info/
-dist/
 build/
-.venv/
+dist/
+.env*
