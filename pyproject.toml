@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "quilt-fleet-tools"
+version = "0.1.0"
+description = "Judge-instrument verification (judge-gate) and benchmark receipt sealing (bench-seal) — sealed instrument gates for LLM-judge and benchmark pipelines"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "SuperInstance contributors" }]
+dependencies = ["requests>=2.31"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[tool.setuptools]
+packages = ["judge_gate", "bench_seal"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "t1",
+    "transcript": "Q: A train leaves at 3pm traveling 60 km/h; a second leaves at 4pm at 80 km/h on the same track. When does it catch up? A: The first train is 60 km ahead at 4pm. The second closes the gap at 20 km/h, so it catches up after 3 hours, i.e. 7pm."
+  },
+  {
+    "id": "t2",
+    "transcript": "Q: Summarize the causes of urban heat islands. A: Cities replace vegetation with asphalt and concrete, which absorb solar radiation and re-emit it at night; waste heat from vehicles and AC adds more; reduced airflow in street canyons traps the heat. Mitigation: reflective roofs, tree cover, permeable surfaces."
+  },
+  {
+    "id": "t3",
+    "transcript": "Q: Why does bread dough rise? A: Yeast metabolizes sugars and releases carbon dioxide; the gluten network traps the gas bubbles, so the dough expands. Heat later sets the crumb structure."
+  },
+  {
+    "id": "t4",
+    "transcript": "Q: Convert the prose 'every user owns at most one laptop' to a cardinality constraint. A: User (1) -- (0..1) Laptop: each User is associated with at most one Laptop; a Laptop belongs to exactly one User."
+  },
+  {
+    "id": "t5",
+    "transcript": "Q: What is the time complexity of binary search and why? A: Each step halves the search interval, so the number of steps is log2(n); overall O(log n), with O(1) work per step."
+  },
+  {
+    "id": "t6",
+    "transcript": "Q: Draft a one-sentence apology for a delayed shipment that stays honest. A: Your order left our warehouse later than promised because of an inventory error on our side; it is now in transit and we have refunded the shipping cost."
+  }
+]

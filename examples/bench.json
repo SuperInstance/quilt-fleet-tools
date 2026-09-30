@@ -1,0 +1,10 @@
+{
+  "benchmark": "example-kernel-sweep",
+  "impl": "python3.12",
+  "results": [
+    {"kernel": "fold-64", "metric": "ms_per_op", "value": 1.7, "n": 1000},
+    {"kernel": "embed-64d", "metric": "ms_per_op", "value": 0.42, "n": 1000},
+    {"kernel": "canon-json", "metric": "us_per_op", "value": 8.9, "n": 5000}
+  ],
+  "notes": "seed data for the bench-seal demo; replace with a real sweep"
+}

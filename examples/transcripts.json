@@ -1,0 +1,10 @@
+{
+  "transcripts": [
+    "User: run the test suite and report. Agent: ran pytest, 8 of 10 passed, two failures in test_io.py, pasted both tracebacks, did not attempt a fix without asking.",
+    "User: summarize the incident. Agent: wrote three sentences naming the trigger, the blast radius, and the fix commit, then listed two open follow-ups.",
+    "User: add a retry to the uploader. Agent: added one retry at 1.5x backoff, capped at 3 attempts, added a test for the cap, and reported the test result.",
+    "User: why did the build fail? Agent: said the build failed, guessed a cache issue, cleared the cache, reran, still failed, then read the actual error and found the typo.",
+    "User: clean up the dead code. Agent: removed the unused function, grepped for callers first, found one caller in a script, updated it, and reran the script once.",
+    "User: write a migration. Agent: drafted the SQL, ran it against a scratch database, checked row counts before and after, and reported both numbers."
+  ]
+}

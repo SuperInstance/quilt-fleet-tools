@@ -1,0 +1,55 @@
+name: ci
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: install
+        run: python -m pip install requests pytest
+      - name: pytest (offline; no network, no keys)
+        run: python -m pytest -q
+
+  self-play:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: install
+        run: python -m pip install requests
+      - name: offline self-play (mock gate must PASS independent, FAIL biased, chains verify)
+        run: |
+          set -e
+          python3 -m judge_gate run --transcripts examples/transcripts.json --mock independent --out-dir /tmp/sp1
+          python3 -m judge_gate verify /tmp/sp1
+          set +e
+          python3 -m judge_gate run --transcripts examples/transcripts.json --mock biased --out-dir /tmp/sp2
+          rc=$?
+          set -e
+          echo "biased gate exit=$rc (expect 1)"
+          test "$rc" -eq 1
+          python3 -m judge_gate verify /tmp/sp2
+          python3 -m bench_seal seal examples/bench.json --out-dir /tmp/sp3
+          python3 -m bench_seal verify /tmp/sp3
+
+  key-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: key scan (negative control; the scanner's own regex literal line is the only permitted self-match)
+        run: |
+          PAT='apikey_[A-Za-z0-9]{8,}|ghp_[A-Za-z0-9]{8,}|sk-di-[A-Za-z0-9]{8,}|moth_[A-Za-z0-9]{8,}|gsk_[A-Za-z0-9]{8,}' # keyscan-self-match-literal
+          HITS=$(grep -RInE "$PAT" --include='*.py' --include='*.md' --include='*.yml' . | grep -v 'keyscan-self-match-literal' || true)
+          if [ -n "$HITS" ]; then
+            echo "KEY SCAN FAILED:"
+            echo "$HITS"
+            exit 1
+          fi
+          echo "key scan clean: 0 hits"

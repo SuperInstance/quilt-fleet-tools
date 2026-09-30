@@ -1,0 +1,10 @@
+{
+  "benchmark": "example-suite",
+  "description": "toy benchmark results file used as a bench-seal smoke input",
+  "rows": [
+    { "impl": "flat", "kernel": "sweep", "shape": "64x64", "metric": "cells_per_s", "value": 1700000 },
+    { "impl": "c_o3", "kernel": "sweep", "shape": "64x64", "metric": "cells_per_s", "value": 523000000 },
+    { "impl": "mojo", "kernel": "sweep", "shape": "64x64", "metric": "cells_per_s", "value": 408000000 }
+  ],
+  "verdict": "MEASURED (example data, not a claim)"
+}
