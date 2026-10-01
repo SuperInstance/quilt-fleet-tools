@@ -20,6 +20,13 @@ Sealed instrument gates for the SuperInstance quilt fleet:
   an append-only chain where each entry hashes the previous one; `verify`
   recomputes every link and detects tampering, reordering, and truncation.
 
+- **rehydrate** — decay-curve model + rehydration scheduler (wave-72 seed):
+  fits divergence fraction d(t) vs truncation depth t from a measured curve
+  (anchored logistic or piecewise-linear; both pinned at the PROBE-2-proven
+  d(0)=0 / d(1)=1), then decides `catchup` vs `rehydrate` for a replica
+  checkpointed at depth k of an n-diff stream where only p prefix receipts
+  are verifiable. Deterministic, offline, no network.
+
 ## Honest scope
 
 - judge_gate verifies the INSTRUMENT (stability + label independence). It
@@ -35,6 +42,9 @@ Sealed instrument gates for the SuperInstance quilt fleet:
 python -m fleet_tools bench-seal seal outputs/bench.json --dir seals/
 python -m fleet_tools bench-seal verify --dir seals/
 python -m fleet_tools judge-gate --items items.json --judges tencent/Hy3,inclusionAI/Ling-3.0-flash --out gate_receipts/
+python -m fleet_tools rehydrate-plan --curve outputs/w72-decay-curve.json \
+  --stream-length 101 --prefix-known 51 --replica-depth 30 \
+  --cost-full 300 --cost-per-diff 1 --threshold 0.02
 ```
 
 `items.json` entries: `{"id", "text", "label_true", "label_swapped"}`.

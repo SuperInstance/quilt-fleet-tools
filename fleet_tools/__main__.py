@@ -3,12 +3,15 @@
   python -m fleet_tools bench-seal verify --dir seals/
   python -m fleet_tools judge-gate --items items.json --judges M1,M2 --out receipts/
     items.json: [{"id": "...", "text": "...", "label_true": "A", "label_swapped": "B"}]
+  python -m fleet_tools rehydrate-plan --curve CURVE.json [--stream-length N]
+    [--prefix-known P] [--replica-depth K] [--cost-full X] [--cost-per-diff Y]
+    [--threshold 0.02] [--fit logistic|piecewise]   # prints decision JSON
 """
 import argparse
 import json
 import sys
 
-from . import bench_seal, judge_gate
+from . import bench_seal, judge_gate, rehydrate
 
 
 def main():
@@ -30,6 +33,24 @@ def main():
                     help="comma-separated allowlisted judge model ids")
     jg.add_argument("--out", default="gate_receipts")
 
+    rp = sub.add_parser("rehydrate-plan",
+                        help="catchup-vs-rehydrate decision for a decayed stream")
+    rp.add_argument("--curve", required=True,
+                    help="decay curve JSON (w72-decay-curve.json or bare point list)")
+    rp.add_argument("--stream-length", type=int, default=None,
+                    help="canonical stream depth n (default: curve's stream_commits)")
+    rp.add_argument("--prefix-known", type=int, default=None,
+                    help="verifiable prefix receipts p (default: n, i.e. intact)")
+    rp.add_argument("--replica-depth", type=int, default=0,
+                    help="replica checkpoint depth k")
+    rp.add_argument("--cost-full", type=float, default=300.0,
+                    help="cost of one full rehydration from seal (policy knob)")
+    rp.add_argument("--cost-per-diff", type=float, default=1.0,
+                    help="cost per incrementally applied diff (policy knob)")
+    rp.add_argument("--threshold", type=float, default=rehydrate.DEFAULT_THRESHOLD,
+                    help="max acceptable expected divergence fraction (default 0.02)")
+    rp.add_argument("--fit", choices=("logistic", "piecewise"), default="logistic")
+
     args = ap.parse_args()
     if args.cmd == "bench-seal":
         if args.op == "seal":
@@ -48,6 +69,19 @@ def main():
         out = {k: v for k, v in receipt.items() if k != "usage"}
         print(json.dumps(out, indent=1, sort_keys=True))
         sys.exit(0 if receipt["GATE"] == "PASS" else 1)
+    elif args.cmd == "rehydrate-plan":
+        points, meta = rehydrate.load_curve(args.curve)
+        model = rehydrate.DecayModel.fit(points, kind=args.fit)
+        n = args.stream_length if args.stream_length is not None else meta.get("stream_commits")
+        if n is None:
+            ap.error("--stream-length required (curve JSON has no stream_commits)")
+        p = args.prefix_known if args.prefix_known is not None else n
+        sched = rehydrate.RehydrationScheduler(model, threshold=args.threshold)
+        decision = sched.decide(p, args.replica_depth, n,
+                                args.cost_full, args.cost_per_diff)
+        decision["model"] = {"kind": model.kind, "params": model.params,
+                             "r2": model.r2, "points": len(model.points)}
+        print(json.dumps(decision, indent=1, sort_keys=True))
 
 
 if __name__ == "__main__":

@@ -203,8 +203,14 @@ def seal_receipt(out_dir: str, receipt: dict) -> str:
     receipt = dict(receipt)
     receipt["prev_receipt_sha256"] = prev
     receipt["sealed_at"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
-    path = os.path.join(
-        out_dir, f"gate_receipt_{int(time.time() * 1000)}.json")
+    # distinct name per receipt: same-ms reseals must not overwrite the
+    # previous link (the wave-71 lesson — see worklog 71-e)
+    ms = int(time.time() * 1000)
+    path = os.path.join(out_dir, f"gate_receipt_{ms}.json")
+    n = 0
+    while os.path.exists(path):
+        n += 1
+        path = os.path.join(out_dir, f"gate_receipt_{ms}_{n}.json")
     with open(path, "w") as f:
         json.dump(receipt, f, indent=1, sort_keys=True)
     return path
