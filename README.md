@@ -27,6 +27,12 @@ Sealed instrument gates for the SuperInstance quilt fleet:
   checkpointed at depth k of an n-diff stream where only p prefix receipts
   are verifiable. Deterministic, offline, no network.
 
+- **promise_census** — promise→implementation linkage census for any repo
+  (wave-72 seed, generalized from wave-71 PROBE-1 synesis-promise-seal):
+  finds promise documents (commitment patterns), extracts promise units
+  (bullets + crate/module identifiers), collects implementation bytes, and
+  reports per-repo `linkage_ratio` JSON. Deterministic, offline.
+
 ## Honest scope
 
 - judge_gate verifies the INSTRUMENT (stability + label independence). It
@@ -45,6 +51,8 @@ python -m fleet_tools judge-gate --items items.json --judges tencent/Hy3,inclusi
 python -m fleet_tools rehydrate-plan --curve outputs/w72-decay-curve.json \
   --stream-length 101 --prefix-known 51 --replica-depth 30 \
   --cost-full 300 --cost-per-diff 1 --threshold 0.02
+python -m fleet_tools promise-census REPO [REPO...] --out census.json \
+  --tag-crosscheck '<promise>[A-Z0-9_]+</promise>'
 ```
 
 `items.json` entries: `{"id", "text", "label_true", "label_swapped"}`.

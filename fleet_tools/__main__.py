@@ -3,6 +3,8 @@
   python -m fleet_tools bench-seal verify --dir seals/
   python -m fleet_tools judge-gate --items items.json --judges M1,M2 --out receipts/
     items.json: [{"id": "...", "text": "...", "label_true": "A", "label_swapped": "B"}]
+  python -m fleet_tools promise-census REPO [REPO...] [--out FILE]
+    [--tag-crosscheck REGEX]   # e.g. '<promise>[A-Z0-9_]+</promise>'
   python -m fleet_tools rehydrate-plan --curve CURVE.json [--stream-length N]
     [--prefix-known P] [--replica-depth K] [--cost-full X] [--cost-per-diff Y]
     [--threshold 0.02] [--fit logistic|piecewise]   # prints decision JSON
@@ -11,7 +13,7 @@ import argparse
 import json
 import sys
 
-from . import bench_seal, judge_gate, rehydrate
+from . import bench_seal, judge_gate, rehydrate, promise_census
 
 
 def main():
@@ -32,6 +34,14 @@ def main():
     jg.add_argument("--judges", required=True,
                     help="comma-separated allowlisted judge model ids")
     jg.add_argument("--out", default="gate_receipts")
+
+    pc = sub.add_parser("promise-census",
+                        help="promise->implementation linkage census per repo")
+    pc.add_argument("repos", nargs="+")
+    pc.add_argument("--out", help="write combined JSON here (also prints)")
+    pc.add_argument("--tag-crosscheck", default=None,
+                    help="optional tag regex cross-check (e.g. wave-71 "
+                         "'<promise>[A-Z0-9_]+</promise>')")
 
     rp = sub.add_parser("rehydrate-plan",
                         help="catchup-vs-rehydrate decision for a decayed stream")
@@ -69,6 +79,10 @@ def main():
         out = {k: v for k, v in receipt.items() if k != "usage"}
         print(json.dumps(out, indent=1, sort_keys=True))
         sys.exit(0 if receipt["GATE"] == "PASS" else 1)
+    elif args.cmd == "promise-census":
+        results = promise_census.census_repos(
+            args.repos, out_path=args.out, cross_check_tag=args.tag_crosscheck)
+        print(json.dumps(results, indent=1, sort_keys=True))
     elif args.cmd == "rehydrate-plan":
         points, meta = rehydrate.load_curve(args.curve)
         model = rehydrate.DecayModel.fit(points, kind=args.fit)
